@@ -1,11 +1,12 @@
-import sys
+import random
 
-from create_problem_sets import *
 from function_selection import cross_types
-from PSO import *
+from algorithems import algortithem
 from settings import *
 from sys import maxsize
 import numpy
+import math
+
 
 """ to generalize the problem we created a class that given a population calculates the solution"""
 
@@ -20,8 +21,8 @@ class genetic_algorithem(algortithem):
     Distance_hash = {}
 
     def __init__(self, target, tar_size, pop_size, problem_spec, crosstype, fitnesstype, selection,
-                 serviving_mechanizem, mutation, gene_dist, mutation_probability=0):
-        algortithem.__init__(self, target, tar_size, pop_size, problem_spec, fitnesstype, selection)
+                 serviving_mechanizem, mutation, gene_dist, max_iter,mutation_probability=0):
+        algortithem.__init__(self, target, tar_size, pop_size, problem_spec, fitnesstype, selection,max_iter)
         self.cross_func = cross_types().select[crosstype]
         self.serviving = serviving_mechanizem
         self.mutation_type = mutation
@@ -176,9 +177,9 @@ class genetic_algorithem(algortithem):
 
 class GA_LAB1(genetic_algorithem):
     def __init__(self, target, tar_size, pop_size, problem_spec, crosstype, fitnesstype, selection,
-                 serviving_mechanizem, mutation, gene_dist, mutation_probability=0):
+                 serviving_mechanizem, mutation, gene_dist,max_iter, mutation_probability=0):
         genetic_algorithem.__init__(self, target, tar_size, pop_size, problem_spec, crosstype, fitnesstype, selection,
-                 serviving_mechanizem, mutation, gene_dist,mutation_probability)
+                 serviving_mechanizem, mutation, gene_dist,max_iter,mutation_probability)
     def algo(self, i):
         self.sort_by_fitness()
         self.propablities_rank_based()
