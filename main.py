@@ -21,16 +21,31 @@ problem_sets_bin_packing = {1: 'N1C1W1_A', 2: 'N1C1W1_B', 3: 'N1C1W1_C', 4: 'N1C
 
 # todo : function to get files
 def get_sets_from_files(name):
-    pass
+    file = open(fr"inputs\{name}.txt", "r")
+    weights = file.read().splitlines()
+    weights1 = [int(k) for k in weights]
+    file.close()
 
 
 def get_bin_packing_weights(name):
-    file = open(fr"bin_packing_prob\{name}.BPP", "r")
+    file = open(fr"inputs\{name}.txt", "r")
     weights = file.read().splitlines()
     weights1 = [int(k) for k in weights]
     file.close()
 
     return weights1[0], weights1[1], weights1[2:]
+
+#todo: create cities so that we can use them initially , they will be sent to all algorithms
+# todo: flow is :
+#  1. create cities class.
+#  2. get cities from input
+#  3. send them either to algorithm or fitness function
+#  3.1.  create data sets,so that the algorithms understand the data
+#  3.2.  check correctness of generated data
+#  3.3.  understand how to translate the data to cities and cars (i.e fitness function)
+#  4. solve problem for GA
+#  5. solve for the rest of algorithms
+
 
 
 def main():
