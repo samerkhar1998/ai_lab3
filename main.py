@@ -16,10 +16,12 @@ problem_sets_PSO = {BUL_PGIA: PSO_prb}
 
 # todo : new problem sets
 
-problem_sets_bin_packing = {1: 'N1C1W1_A', 2: 'N1C1W1_B', 3: 'N1C1W1_C', 4: 'N1C1W1_D'}
-
 
 # todo : function to get files
+inputs = {1: "E-n22-k4.txt", 2: "E-n33-k4.txt", 3: "E-n51-k5.txt", 4: "E-n76-k8.txt", 5: "E-n76-k10.txt",
+          6: "E-n101-k8.txt", 7: "E-n101-k14.txt"}
+dir = "./inputs/"
+
 def get_sets_from_files(name):
     file = open(fr"inputs\{name}.txt", "r")
     weights = file.read().splitlines()
@@ -53,78 +55,40 @@ def main():
     Gene_dist = 4
     GA_TARGET = None
     while process:
+
+        '''
+        get input
+        pop size
+        select input 
+        generators 
+        mutation
+        algo 
+        '''
+        # get_sets_from_files(name)
+        # default vals
+        serviving_stratigy = 1 # elite
+        crosstype=3
+        # pop size
         GA_POPSIZE = int(input("set population size:"))
+
+        select_input = int(input("1: E-n22-k4.txt, 2: E-n33-k4.txt, 3: E-n51-k5.txt, 4: E-n76-k8.txt, 5: E-n76-k10.txt,"
+                                 "6: E-n101-k8.txt, 7: E-n101-k14.txt"))
+        # target ,from select_input
+        #parameters= get_sets_from_files(inputs[select_input])
+        GA_TARGET = None
+        TAR_size = len(GA_TARGET)
+
+        select_generator=int(input("select construction :  1:clark write  2:nearest neigbour"))
+        # generators
+        problem_set=problem_sets_GA[select_generator]
+        # mutation
+        mutation = int(
+            input("choose mutation scheme:  random mutation: 1 ,swap_mutate: 2 ,insertion_mutate: 3"))
+        # cho
         alg = int(input("chose algorithem :  1:GA  \n2:PSO 3:Minimal conflicts \n 4:first fit\n 5: baldwins\n 6:MA+GA"))
-        solution = None
-        if alg == GenA:
-            prob = int(input("choose problem to solve :  1:Bul Pgia  2:N Queens 3:Bin Packing Prob"))
-            problem_set = problem_sets_GA[prob]
+        solution = algo[alg](GA_TARGET, target_size, GA_POPSIZE, problem_set, crosstype, fit, selection,
+                             serviving_stratigy, mutation, Gene_dist)
 
-            serviving_stratigy = int(input("choose surviving strategy :  Elite: 1 ,Age: 2"))
-
-            print("if you want to use cx make sure that the string doesn't have 2 matching letters ! ")
-            GA_TARGET = input("type string: ")
-            TAR_size = len(GA_TARGET)
-            crosstype = int(
-                input("choose cross function :  One Cross: 1  Two Cross: 2  Uniform: 3  PMX: 4   CX: 5"))
-            selection = int(input("choose selection function :  RAND: 0  SUS: 1  RWS: 2  tournement:3"))
-            fit = int(input("choose fitness function :  0:Distance  1:Bul Pgia   "))
-            mutation = int(
-                input("choose mutation scheme:  random mutation: 1 ,swap_mutate: 2 ,insertion_mutate: 3"))
-            target_size = TAR_size
-            speciation = int(input("chose speciation type :  1: threshold speciation  2:k-means clustering 3: none "))
-            if speciation == 1 or speciation == 2:
-                solution = Genetic_speciation(GA_TARGET, target_size, GA_POPSIZE, problem_set, crosstype, fit,
-                                              selection,
-                                              serviving_stratigy, mutation, Gene_dist, speciation)
-
-            else:
-                solution = algo[alg](GA_TARGET, target_size, GA_POPSIZE, problem_set, crosstype, fit, selection,
-                                     serviving_stratigy, mutation, Gene_dist)
-        # todo: change to new algorithms : i.e change elif alg== X then do Y
-        elif alg == PSO:
-            print("if you want to use cx make sure that the string doesn't have 2 matching letters ! ")
-            GA_TARGET = input("type string: ")
-            TAR_size = len(GA_TARGET)
-            problem_set = problem_sets_PSO[int(input("choose problem to solve :  1:Bul Pgia "))]
-            fit = int(input("choose fitness function :  0:Distance  1:Bul Pgia "))
-            solution = algo[alg](GA_TARGET, TAR_size, GA_POPSIZE, problem_set, fit)
-        elif alg == MINIMAL_CONF:
-            target_size = int(input("choose number of queens :"))
-            target = None
-            solution = algo[alg](target, target_size, selection=None)
-
-            overall_time = time.perf_counter()
-        elif alg == FIRST_FIT:
-            problem_set = problem_sets_GA[4]
-            target = []
-            # get problem weights from file
-            bin_pack_prob = int(input("N1C1W1_A: 1 ,N1C1W1_B: 2,N1C1W1_C: 3,N1C1W1_D: 4"))
-            # send target with [real target with numbers instead of weights,capacity of each bin]
-            n, capacity, weights = get_bin_packing_weights(problem_sets_bin_packing[bin_pack_prob])
-            target.append([i for i in range(len(weights))])
-            target.append(int(capacity))
-            # create hash table so that we can use permutaions of the problem without worrying about 2 of the same weights
-            for i in range(len(target[0])):
-                hash_table[i] = weights[i]
-            # print(hash_table)
-            # add target to problem
-            problem_set.target = target
-            problem_set.capacity = target[1]
-            solution = algo[alg](target, capacity, problem_set)
-        elif alg == 5:
-            serviving_stratigy = int(input("choose surviving strategy :  Elite: 1 ,Age: 2"))
-            print("if you want to use cx make sure that the string doesn't have 2 matching letters ! ")
-            GA_TARGET = input("type bit string: ")
-            crosstype = int(
-                input("choose cross function :  One Cross: 1  Two Cross: 2  Uniform: 3  PMX: 4   CX: 5"))
-            selection = int(input("choose selection function :  RAND: 0  SUS: 1  RWS: 2  tournement:3"))
-            fit = int(input("choose fitness function :  0:Distance  1:Bul Pgia   "))
-            mutation = int(
-                input("choose mutation scheme:  random mutation: 1 ,swap_mutate: 2 ,insertion_mutate: 3"))
-            target_size = len(GA_TARGET)
-            solution = algo[alg](GA_TARGET, target_size, GA_POPSIZE, baldwin_effect, crosstype, fit, selection,
-                                 serviving_stratigy, mutation, Gene_dist, 0)
         overall_time = time.perf_counter()
         solution.solve()
         overall_time = time.perf_counter() - overall_time
