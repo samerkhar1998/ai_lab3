@@ -7,11 +7,20 @@ from first_fit import FirstFit
 from create_problem_sets import *
 from MA import PureMA
 import time
+ISLAND,ACO_PAR,SA,TS,CO_PS=2,3,4,5,6
+algo = {GenA: genetic_algorithem,ISLAND:PureMA, ACO_PAR:ACO ,SA:simulated_anealling,TS:Tabu_search,CO_PS:CO_PSO}
 
-algo = {GenA: genetic_algorithem, PSO: PSO_alg, MINIMAL_CONF: Minimal_conflicts, FIRST_FIT: FirstFit,5:PureMA}
-problem_sets_GA = {BUL_PGIA: DNA, NQUEENS: NQueens_prb, 3: bin_packing_prob, 4: bin_pack}
+problem_sets_GA = {NN:nearest_neighbour,CW:clark_write}
+
 problem_sets_PSO = {BUL_PGIA: PSO_prb}
+
+# todo : new problem sets
 problem_sets_bin_packing = {1: 'N1C1W1_A', 2: 'N1C1W1_B', 3: 'N1C1W1_C', 4: 'N1C1W1_D'}
+
+# todo : function to get files
+def get_sets_from_files(name):
+    pass
+
 
 
 def get_bin_packing_weights(name):
@@ -36,59 +45,27 @@ def main():
             problem_set = problem_sets_GA[prob]
 
             serviving_stratigy = int(input("choose surviving strategy :  Elite: 1 ,Age: 2"))
-            if prob == BUL_PGIA:
-                print("if you want to use cx make sure that the string doesn't have 2 matching letters ! ")
-                GA_TARGET = input("type string: ")
-                TAR_size = len(GA_TARGET)
-                crosstype = int(
-                    input("choose cross function :  One Cross: 1  Two Cross: 2  Uniform: 3  PMX: 4   CX: 5"))
-                selection = int(input("choose selection function :  RAND: 0  SUS: 1  RWS: 2  tournement:3"))
-                fit = int(input("choose fitness function :  0:Distance  1:Bul Pgia   "))
-                mutation = int(
-                    input("choose mutation scheme:  random mutation: 1 ,swap_mutate: 2 ,insertion_mutate: 3"))
-                target_size = TAR_size
-            elif prob == NQUEENS:
-                Gene_dist = 5
-                fit = NQUEENS
-                crosstype = int(
-                    input("choose cross function :  One Cross: 1  Two Cross: 2  Uniform: 3  PMX: 4   CX: 5"))
-                selection = int(input("choose selection function :  RAND: 0  SUS: 1  RWS: 2  tournement:3"))
-                mutation = int(input("choose mutation scheme:swap_mutate: 2 ,insertion_mutate: 3"))
-                target_size = int(input("choose number of queens :"))
-            else:  # bin_packing
-                Gene_dist = 5
-                target = []
-                selection = int(input("choose selection function :  RAND: 0  SUS: 1  RWS: 2  tournement:3"))
-                crosstype = int(input("choose cross function :  CX: 5"))
-                mutation = int(input("choose mutation scheme:  swap_mutate: 2 ,insertion_mutate: 3"))
-                # get problem weights from file
-                bin_pack_prob = int(input("N1C1W1_A: 1 ,N1C1W1_B: 2,N1C1W1_C: 3,N1C1W1_D: 4"))
-                # send target with [real target with numbers instead of weights,capacity of each bin]
-                n, capacity, weights = get_bin_packing_weights(problem_sets_bin_packing[bin_pack_prob])
-                target.append([i for i in range(len(weights))])
-                target.append(int(capacity))
-                # print(target[0])
-                # give hash table correct keys so that everything works !
-                for i in range(len(target[0])):
-                    hash_table[i] = weights[i]
-                print(hash_table)
 
-                # add target to problem
-                problem_set.target = target
-                problem_set.capacity = target[1]
-                fit = BIN
-
-                target_size = 10
-            mutation_pos= int(input("for hyper press 1 for normal press 0"))
+            print("if you want to use cx make sure that the string doesn't have 2 matching letters ! ")
+            GA_TARGET = input("type string: ")
+            TAR_size = len(GA_TARGET)
+            crosstype = int(
+                input("choose cross function :  One Cross: 1  Two Cross: 2  Uniform: 3  PMX: 4   CX: 5"))
+            selection = int(input("choose selection function :  RAND: 0  SUS: 1  RWS: 2  tournement:3"))
+            fit = int(input("choose fitness function :  0:Distance  1:Bul Pgia   "))
+            mutation = int(
+                input("choose mutation scheme:  random mutation: 1 ,swap_mutate: 2 ,insertion_mutate: 3"))
+            target_size = TAR_size
             speciation = int(input("chose speciation type :  1: threshold speciation  2:k-means clustering 3: none "))
             if speciation==1 or speciation==2:
                 solution = Genetic_speciation(GA_TARGET, target_size, GA_POPSIZE, problem_set, crosstype, fit,
                                               selection,
-                                              serviving_stratigy, mutation, Gene_dist, speciation, mutation_pos)
+                                              serviving_stratigy, mutation, Gene_dist, speciation)
 
             else:
                 solution = algo[alg](GA_TARGET, target_size, GA_POPSIZE, problem_set, crosstype, fit, selection,
-                                     serviving_stratigy, mutation, Gene_dist, mutation_pos)
+                                     serviving_stratigy, mutation, Gene_dist)
+        # todo: change to new algorithms : i.e change elif alg== X then do Y
         elif alg == PSO:
             print("if you want to use cx make sure that the string doesn't have 2 matching letters ! ")
             GA_TARGET = input("type string: ")
