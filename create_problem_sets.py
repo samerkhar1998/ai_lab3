@@ -133,29 +133,20 @@ class PSO_prb(DNA):
             return super(PSO_prb, self).__str__()
 
 # todo: create new problem set for clark write
-
-class baldwin_effect(DNA):
-    # our object is the initial position , we added 2 parameters that are required
+class clark_write(DNA):
     def __init__(self):
-        DNA.__init__(self)
+        super(clark_write, self).__init__()
+    def create_object(self, target_size, target):
+        #todo : self.object=result  , should be array of numbers/characters
+        # cw_generator
+        pass
+
+
+class nearest_neighbour(DNA):
+    def __init__(self):
+        super(nearest_neighbour, self).__init__()
 
     def create_object(self, target_size, target):
-        numTrue = math.floor(0.25 * target_size)
-        numQmark = target_size - 2 * numTrue
-        places_to_select = [i for i in range(target_size)]
-        self.object = [None] * target_size
-        Qmarkplaces = random.sample(places_to_select, numQmark)
-        places_to_select = list(numpy.setxor1d(numpy.array(places_to_select), numpy.array(Qmarkplaces)))
-        true_places = random.sample(places_to_select, numTrue)
+        # todo : self.object=result  , nn_generator
+        pass
 
-        self.object = ['?' if i in Qmarkplaces else '1' if i in true_places else '0' for i in range(target_size)]
-
-    def character_creation(self, target_size=0):
-        return chr(random.randint(0,1))
-
-
-#
-# if __name__ == "__main__":
-#     k = baldwin_effect()
-#     k.create_object(10, '123124234')
-#     print(k)

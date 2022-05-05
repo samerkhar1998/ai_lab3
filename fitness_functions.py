@@ -10,7 +10,7 @@ from math import ceil
 
 hash_table = {}
 
-
+# todo: fitness function that translate's input into cars+cities that returns a value
 class fitness_selector:
     def __init__(self):
         self.select = {0: self.distance_fittness, 1: self.bul_pqia, 2: self.n_queens_conflict,
