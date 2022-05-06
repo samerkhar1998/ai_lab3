@@ -1,12 +1,14 @@
 
 from Genetic import GA_LAB1
+from ACO import ACO_alg
 import math
 
 from create_problem_sets import nearest_neighbour,clark_wright
 from settings import *
 import time
 
-# algo = {GenA: genetic_algorithem, ISLAND: PureMA, ACO_PAR: ACO, SA: simulated_anealling, TS: Tabu_search, CO_PS: CO_PSO}
+# algo = {GenA: GA_LAB1, ISLAND: PureMA, ACO_PAR: ACO, SA: simulated_anealling, TS: Tabu_search, CO_PS: CO_PSO}
+algo = {GenA: GA_LAB1, 2: ACO_alg}
 
 problem_sets_GA = {1: nearest_neighbour, 2: clark_wright}
 # problem_sets_PSO = {BUL_PGIA: PSO_prb}
@@ -113,12 +115,11 @@ def main():
         mutation = int(
             input("choose mutation scheme:  random mutation: 1 ,swap_mutate: 2 ,insertion_mutate: 3"))
         # cho
-        alg = int(input("chose algorithem :\n  1:GA "))
+        alg = int(input("chose algorithem :\n1: GA \n2: ACO"))
 
-        solution = GA_LAB1(GA_TARGET, target_size, GA_POPSIZE, problem_set, crosstype, "fitness", 3,
-                             serviving_stratigy, mutation, Gene_dist,max_iter=max_iter)
-        # solution = algo[alg](GA_TARGET, target_size, GA_POPSIZE, problem_set, crosstype, "fitness", 3,
-        #                      serviving_stratigy, mutation, Gene_dist)
+        # solution = GA_LAB1(GA_TARGET, target_size, GA_POPSIZE, problem_set, crosstype, "fitness", 3,
+        #                      serviving_stratigy, mutation, Gene_dist,max_iter=max_iter)
+        solution = algo[alg](GA_TARGET, target_size, GA_POPSIZE, problem_set,"fitness",max_iter)
 
         overall_time = time.perf_counter()
         solution.solve()

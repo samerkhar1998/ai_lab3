@@ -150,7 +150,7 @@ class fitness_selector:
     def baldwinss(self, pop_size, tries, num_tries):
         return 1 + ((pop_size - 1) * tries / num_tries)
 
-    def fitness(self, object, target, return_output=True):
+    def fitness(self, object, target, return_output=True,funct=False):
         cities, cost_matrix, dimentions, capacity=target[0],target[1],target[2],target[3]
         prints = False
         arr=object.object
@@ -163,13 +163,10 @@ class fitness_selector:
         allPaths = []
         # print(len(arr))
         for i in range(1, len(arr)):
-            # print("Demand of city : ", arr[i], " is ", cities[arr[i] - 1].demand)
             curr = arr[i] - 1
             new_truck_distance = repo.neighb[prev] + repo.neighb[curr]
             straight_distance = cities[prev].neighb[curr]
 
-            # print("New Truck Distance: ", new_truck_distance)
-            # print("Straight distance: ", straight_distance)
 
             cap_sum += cities[curr].demand
 
@@ -181,7 +178,6 @@ class fitness_selector:
             else:
                 currPath.append(curr)
                 fit += straight_distance
-            # print("Capacity sum is: ", cap_sum)
             prev = curr
         allPaths.append(currPath)
 
@@ -202,3 +198,10 @@ class fitness_selector:
         object.solution=writ
         object.fitness=fit
         return fit
+
+    def city_dist(self,city, neighbor):
+        # calculates euclidean distance between two cities
+        dx = city.x - neighbor.x
+        dy = city.y - neighbor.y
+        distance = math.sqrt(dx ** 2 + dy ** 2)
+        return distance
