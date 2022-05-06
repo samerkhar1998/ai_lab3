@@ -1,13 +1,8 @@
 # class for fitness functions , add your fitness function here !
 import math
-
-import scipy as scipy
-
 from settings import BIN, HIGH_PENALTY, PENALTY, LIV_DIST, KINDL_TAU
 from numpy import unique
 import numpy
-from math import ceil
-
 hash_table = {}
 
 # todo: fitness function that translate's input into cars+cities that returns a value
@@ -16,7 +11,7 @@ class fitness_selector:
         self.select = {0: self.distance_fittness, 1: self.bul_pqia, 2: self.n_queens_conflict,
                        3: self.n_queens_conf_based_on_place, BIN: self.bins_fitness,
                        LIV_DIST: self.levenshteinDistance, KINDL_TAU: self.kendallTau, 'baldwin': self.baldwinss,
-                       "fixed": self.fixed_distance}
+                       "fixed": self.fixed_distance,"fitness":self.fitness}
 
     def distance_fittness(self, object, target, target_size):
         fitness = 0
@@ -154,3 +149,59 @@ class fitness_selector:
 
     def baldwinss(self, pop_size, tries, num_tries):
         return 1 + ((pop_size - 1) * tries / num_tries)
+
+    def fitness(self, object, target, return_output=True,funct=False):
+        cities, cost_matrix, dimentions, capacity=target[0],target[1],target[2],target[3]
+        prints = False
+        arr=object.object
+        fit = 0
+        repo = cities[0]
+        prev = arr[0] - 1
+        fit += repo.neighb[prev] + repo.neighb[arr[len(arr) - 1] - 1]
+        cap_sum = cities[prev].demand
+        currPath = [prev]
+        allPaths = []
+        # print(len(arr))
+        for i in range(1, len(arr)):
+            curr = arr[i] - 1
+            new_truck_distance = repo.neighb[prev] + repo.neighb[curr]
+            straight_distance = cities[prev].neighb[curr]
+
+
+            cap_sum += cities[curr].demand
+
+            if new_truck_distance < straight_distance or cap_sum >= capacity:
+                allPaths.append(currPath)
+                currPath = [curr]
+                fit += new_truck_distance
+                cap_sum = cities[curr].demand
+            else:
+                currPath.append(curr)
+                fit += straight_distance
+            prev = curr
+        allPaths.append(currPath)
+
+        if prints:
+            writ = f"Fitness: {fit}\n"
+            counter = 1
+            for path in allPaths:
+                writ += f"Car {counter}: " + "0 " + "".join(str(x) + " " for x in path) + "0" + "\n"
+                counter += 1
+
+            # output_file.write(writ)
+        if return_output:
+            writ = f"Fitness: {fit}\n"
+            counter = 1
+            for path in allPaths:
+                writ += f"Car {counter}: " + "0 " + "".join(str(x) + " " for x in path) + "0" + "\n"
+                counter += 1
+        object.solution=writ
+        object.fitness=fit
+        return fit
+
+    def city_dist(self,city, neighbor):
+        # calculates euclidean distance between two cities
+        dx = city.x - neighbor.x
+        dy = city.y - neighbor.y
+        distance = math.sqrt(dx ** 2 + dy ** 2)
+        return distance

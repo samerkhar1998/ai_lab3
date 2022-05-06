@@ -160,9 +160,9 @@ class mate_for_spiecies(genetic_algorithem):
 class Genetic_speciation(genetic_algorithem):
 
     def __init__(self, target, tar_size, pop_size, problem_spec, crosstype, fitnesstype, selection,
-                 serviving_mechanizem, mutation, gene_dist, specieation, mutation_probability=0):
+                 serviving_mechanizem, mutation, gene_dist,max_iter, specieation, mutation_probability=0):
         genetic_algorithem.__init__(self, target, tar_size, pop_size, problem_spec, crosstype, fitnesstype, selection,
-                                    serviving_mechanizem, mutation, gene_dist, mutation_probability)
+                                    serviving_mechanizem, mutation, gene_dist,max_iter, mutation_probability)
         self.mate_for_spiecies = mate_for_spiecies(target, tar_size, pop_size, problem_spec, crosstype, fitnesstype,
                                                    selection,
                                                    serviving_mechanizem, mutation, gene_dist, mutation_probability)

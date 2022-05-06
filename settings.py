@@ -9,7 +9,7 @@ DISTANCE, BUL_PGIA, NQUEENS, LIV_DIST, KINDL_TAU = 0, 1, 2, 4, 5
 # type of cross function
 CROSS1, CROSS2, UNI_CROSS, PMX_, CX_, BIN = 1, 2, 3, 4, 5, 6
 
-# population surviving mechanizem 
+# population surviving mechanizem
 ELITIZEM, AGE = 1, 2
 # penalties given by bul pgiaa heuristic
 
@@ -32,3 +32,4 @@ GenA, PSO, MINIMAL_CONF, FIRST_FIT = 1, 2, 3, 4
 
 ISLAND, ACO_PAR, SA, TS, CO_PS = 2, 3, 4, 5, 6
 NN, CW = 0, 1
+

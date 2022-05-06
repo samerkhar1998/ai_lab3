@@ -7,7 +7,7 @@ import numpy
 
 
 class algortithem:
-    def __init__(self, target, tar_size, pop_size, problem_spec, fitnesstype, selection):
+    def __init__(self, target, tar_size, pop_size, problem_spec, fitnesstype, selection,max_iter):
         self.population = list(range(pop_size))
         self.buffer = list(range(pop_size))
         self.fitness_array = numpy.zeros((pop_size))
@@ -24,6 +24,7 @@ class algortithem:
         self.selection = selection
         self.tick = 0
         self.sol_time = 0
+        self.max_iter=max_iter
         self.solution = problem_spec()
 
 
@@ -71,19 +72,22 @@ class algortithem:
     def solve(self):
         self.handle_initial_time()
         self.init_population()
-        for i in range(GA_MAXITER):
+        for i in range(self.max_iter):
+
             self.iteration += 1
             self.algo(i)
-            self.handle_prints_time()
-            if self.stopage(i):
+            # self.handle_prints_time()
+            if self.stopage(i) or i==self.max_iter-1:
                 print(" number of generations : ",i)
+                self.handle_prints_time()
                 break
+
 
         return 0
 
 
 # print_B = lambda x: print(f" Best:{len(x.object)} ,fittness: {x.fitness} ", end=" ")
-print_B = lambda x: print(f" Best:{ x } ,fittness: {x.fitness} ", end=" ")
+print_B = lambda x: print(f" Best:{ x.solution } ,fittness: {x.fitness} ", end=" ")
 # print_B = lambda x: print(f" Best: {x.object} ,fittness: {x.fitness} ", end=" ")
 
 #  prints mean and variance
