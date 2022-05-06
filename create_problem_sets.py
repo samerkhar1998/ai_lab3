@@ -13,7 +13,7 @@ class Agent:
     fitnesstype = fitness_selector().select
 
     def __init__(self):
-        self.object = None
+        self.object =[]
         self.learning_fitness=0
         self.algo_huristic=None
         self.age = 0
@@ -47,6 +47,7 @@ class Agent:
         bstr = ""
         for i in self.object:
             bstr += str(i) + ","
+        bstr+=self.solution
         return bstr
 
     def __repr__(self):

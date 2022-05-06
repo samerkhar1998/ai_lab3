@@ -15,7 +15,7 @@ class ACO_alg(algortithem):
         self.global_sol = problem_spec()
         self.current_sol =problem_spec()
         self.glob_counter = 0
-        self.glob_visit = problem_spec()
+        self.glob_visit = []
         self.distance=fitness_selector().city_dist
         self.fitness=fitness_selector().fitness
     def algo(self, i):
@@ -23,25 +23,31 @@ class ACO_alg(algortithem):
             self.initiate_phermones()
             self.glob_counter = 0
             self.current_sol.object = []
+
         visited=self.get_visited_cities()
+
         vis=self.prob_spec()
         vis.object=visited
+
         dist=self.sum_of_distances(visited)
         self.updatePheromone(visited,dist)
-        self.current_sol.calculate_fittness(self.target, self.target_size,"fitness")
-        vis.calculate_fittness(self.target, self.target_size,"fitness")
+
         if len(self.current_sol.object) == 0 or len(self.global_sol.object) == 0 or\
-                self.current_sol.fitness > vis.fitness:
+                self.current_sol.calculate_fittness(self.target, self.target_size,"fitness") >\
+                vis.calculate_fittness(self.target, self.target_size,"fitness"):
             self.current_sol.object = visited
-            if len(self.global_sol) == 0:
+            self.current_sol.calculate_fittness(self.target, self.target_size,"fitness")
+            if len(self.global_sol.object) == 0:
                 self.global_sol.object = visited
+                self.global_sol.calculate_fittness(self.target, self.target_size, "fitness")
         self.global_sol.calculate_fittness(self.target, self.target_size,"fitness")
         if self.current_sol.fitness<self.global_sol.fitness:
             self.glob_counter = 0
             self.global_sol.object = self.current_sol.object
-            self.glob_visit.append(self.global_sol)
+            self.glob_visit.append(self.global_sol.object)
         else:
             self.glob_counter += 1
+        self.solution=self.global_sol
 
     def initiate_phermones(self):
         self.PheromoneMatrix = [[1000 for i in range(len(self.cities))] for j in range(len(self.cities))]
@@ -79,6 +85,7 @@ class ACO_alg(algortithem):
         for num in range(len(phermos)):
             phermos[num] += float(phermos[num] / denominator)
         return phermos
+
     def sum_of_distances(self,cities_dist):
         dist = 0
         for i in range(len(cities_dist) - 1):

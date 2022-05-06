@@ -60,7 +60,7 @@ class algortithem:
         runtime = time.perf_counter() - self.sol_time
         clockticks = time.time() - self.tick
         print_B(self.solution)
-        print_mean_var((self.pop_mean, variance((self.pop_mean, self.solution.fitness))))
+        # print_mean_var((self.pop_mean, variance((self.pop_mean, self.solution.fitness))))
         print_time((runtime, clockticks))
 
     def algo(self, i):
