@@ -17,8 +17,8 @@ class algortithem:
         self.pop_mean = 0
         self.iteration = 0  # current iteration that went through the algorithem
         self.prob_spec = problem_spec
-        self.file = open(r"pres.txt", "w+")
-        self.file.close()
+        # self.file = open(r"pres.txt", "w+")
+        # self.file.close()
         self.fitnesstype = fitnesstype
         self.selection_methods = selection_methods()
         self.selection = selection
@@ -26,7 +26,8 @@ class algortithem:
         self.sol_time = 0
         self.max_iter=max_iter
         self.solution = problem_spec()
-
+        self.output=[]
+        self.iter=[]
 
     def init_population(self):
         for i in range(self.pop_size):
@@ -76,18 +77,20 @@ class algortithem:
 
             self.iteration += 1
             self.algo(i)
+            self.output.append(self.solution.fitness)
+            self.iter.append(i)
             # self.handle_prints_time()
             if self.stopage(i) or i==self.max_iter-1:
-                print(" number of generations : ",i)
+                # print(" number of generations : ",i)
                 self.handle_prints_time()
                 break
 
 
-        return 0
+        return self.output,self.iter
 
 
 # print_B = lambda x: print(f" Best:{len(x.object)} ,fittness: {x.fitness} ", end=" ")
-print_B = lambda x: print(f" Best:{ x.solution } ,fittness: {x.fitness} ", end=" ")
+print_B = lambda x: print(f" Best:{ x } ,fittness: {x.fitness} ", end=" ")
 # print_B = lambda x: print(f" Best: {x.object} ,fittness: {x.fitness} ", end=" ")
 
 #  prints mean and variance

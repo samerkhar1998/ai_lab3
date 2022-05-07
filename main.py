@@ -1,19 +1,31 @@
-
+import matplotlib.pyplot as plt
 from Genetic import GA_LAB1
 from ACO import ACO_alg
+from PSO import PSO_alg
 import math
-
+from simulated_annealing import simulated_annealing
+from tabu_search import tabu
 from create_problem_sets import nearest_neighbour,clark_wright
 from settings import *
 import time
-
 # algo = {GenA: GA_LAB1, ISLAND: PureMA, ACO_PAR: ACO, SA: simulated_anealling, TS: Tabu_search, CO_PS: CO_PSO}
-algo = {GenA: GA_LAB1, 2: ACO_alg}
-
+algo = {GenA: GA_LAB1, 2: ACO_alg,3:simulated_annealing,4:tabu }
+tags = {1: "GA_CX_SWAP", 2: "ACO",3:"simulated_annealing",4:"tabu" }
+heuristics={1: "NN", 2: "C&W"}
+mutation_index={2:"SWAP",3:"INSERT"}
 problem_sets_GA = {1: nearest_neighbour, 2: clark_wright}
 # problem_sets_PSO = {BUL_PGIA: PSO_prb}
+inputs_for_testing=["E-n22-k4", "E-n33-k4","E-n51-k5",  "E-n76-k8",  "E-n76-k10",
+           "E-n101-k8",  "E-n101-k14"]
+def plot(fitness, iter,tag,names):
 
-
+    for i in range(len(fitness)):
+        plt.plot(iter[i],fitness[i], label=names[i])
+    plt.ylabel('fitness')
+    plt.xlabel('iterations')
+    plt.title(inputs_for_testing[tag])
+    plt.legend()
+    plt.show()
 
 
 
@@ -67,17 +79,88 @@ def get_sets_from_files(name):
 
     return cities, cost_matrix, dimentions, capacity
 
+def create_results_file(name):
+    file = open(fr"outputs\{name}", "r")
+    f = open(fr"newoutput\{name}", "w+")
+    for _ in range(50):f.write("-")
 
-# todo: create cities so that we can use them initially , they will be sent to all algorithms
-# todo: flow is :
-#  1. create cities class.
-#  2. get cities from input
-#  3. send them either to algorithm or fitness function
-#  3.1.  create data sets,so that the algorithms understand the data
-#  3.2.  check correctness of generated data
-#  3.3.  understand how to translate the data to cities and cars (i.e fitness function)
-#  4. solve problem for GA
-#  5. solve for the rest of algorithms
+    lines = file.readlines()
+    lines = [x.split(' ') for x in lines]
+    spaceforfirst=20
+    for index,line in enumerate(lines):
+        if line[:2]=="GA" or line[:2]=="TS" or line[:2]=="SA" or line[:2]=="AC":
+            f.write("|")
+            f.write(str(line))
+            for i in range(len(line)-spaceforfirst):
+                f.write(" ")
+            f.write("|")
+        if line[1:3]=="fi":
+            f.write("|")
+            f.write(str(lines[index+1]))
+            f.write("|")
+        if line[:3] == "Ti":
+            f.write("|")
+            f.write(str(lines[index + 1]))
+            f.write("|")
+        if line[:3] == "ti":
+            f.write("|")
+            f.write(str(lines[index + 1]))
+            f.write("|")
+
+
+def ga_script():
+    GA_POPSIZE=300
+    max_iter=80
+    for select_input in range(1,len(inputs.keys())+1):
+        fitness_arr,iter_array=[],[]
+
+        # generators
+
+        # mutation
+        Gene_dist = 4
+        cities, cost_matrix, dimentions, capacity = get_sets_from_files(inputs[select_input])
+        GA_TARGET = [cities, cost_matrix, dimentions, capacity]
+        target_size = len(cities)
+        names=[]
+        for select_generator in range(1,3):
+            problem_set = problem_sets_GA[select_generator]
+            for mutation in range(2,4):
+
+                print("GA_I_"+heuristics[select_generator]+"_"+mutation_index[mutation])
+
+                sol=GA_LAB1(GA_TARGET, target_size, GA_POPSIZE, problem_set, CX_, "fitness", 3,
+                                          1, mutation, Gene_dist,max_iter=max_iter)
+                fitness,iteration=sol.solve()
+                fitness_arr.append(fitness)
+                iter_array.append(iteration)
+                names.append("GA_I_"+heuristics[select_generator]+"_"+mutation_index[mutation])
+
+                print("SA_"+heuristics[select_generator]+"_"+mutation_index[mutation])
+
+                sol = algo[3](GA_TARGET, target_size, GA_POPSIZE, problem_set, "fitness", max_iter, mutation)
+                fitness, iteration = sol.solve()
+                fitness_arr.append(fitness)
+                iter_array.append(iteration)
+                names.append("SA_"+heuristics[select_generator]+"_"+mutation_index[mutation])
+
+                print("TS_"+heuristics[select_generator]+"_"+mutation_index[mutation])
+
+                sol = algo[4](GA_TARGET, target_size, GA_POPSIZE, problem_set, "fitness", max_iter, mutation)
+                fitness, iteration = sol.solve()
+                fitness_arr.append(fitness)
+                iter_array.append(iteration)
+                names.append("TS_"+heuristics[select_generator]+"_"+mutation_index[mutation])
+
+            print("ACO_" + heuristics[select_generator] )
+
+            sol = algo[2](GA_TARGET, target_size, GA_POPSIZE, problem_set, "fitness", max_iter)
+            fitness, iteration = sol.solve()
+            fitness_arr.append(fitness)
+            iter_array.append(iteration)
+            names.append("ACO_" + heuristics[select_generator] )
+
+        plot(fitness_arr, iter_array, select_input,names)
+
 
 def main():
 
@@ -115,11 +198,11 @@ def main():
         mutation = int(
             input("choose mutation scheme:  random mutation: 1 ,swap_mutate: 2 ,insertion_mutate: 3"))
         # cho
-        alg = int(input("chose algorithem :\n1: GA \n2: ACO"))
+        alg = int(input("chose algorithem :\n1:Island GA \n2: Ant Colony Optimization \n3: simulated annealing\n4: tabu search"))
 
         # solution = GA_LAB1(GA_TARGET, target_size, GA_POPSIZE, problem_set, crosstype, "fitness", 3,
         #                      serviving_stratigy, mutation, Gene_dist,max_iter=max_iter)
-        solution = algo[alg](GA_TARGET, target_size, GA_POPSIZE, problem_set,"fitness",max_iter)
+        solution = algo[alg](GA_TARGET, target_size, GA_POPSIZE, problem_set,"fitness",max_iter,mutation)
 
         overall_time = time.perf_counter()
         solution.solve()
@@ -133,4 +216,4 @@ def main():
 
 
 if __name__ == "__main__":
-    main()
+    ga_script()
