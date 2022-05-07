@@ -12,7 +12,6 @@ class mutations:
 
     def swap_mutate(self, target_size, member, character_creation):
         size=len(member.object)
-
         ipos = random.randint(0, size - 2)
         ipos2 = random.randint(ipos + 1, size - 1)
         member.object = member.object[:ipos] + [member.object[ipos2]] + member.object[ipos + 1:ipos2] + [

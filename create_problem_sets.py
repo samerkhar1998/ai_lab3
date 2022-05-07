@@ -3,12 +3,19 @@ import random
 import sys
 from fitness_functions import fitness_selector
 from mutations import mutations
+import math
 # have to fill hash table with different keys when getting the command from main
 
 
 # basic class for all problem sets because fittness and the member of the population are problem specific
 # and we have to eliminate problem specifc parameters from the Genetic algorithem
 # might add mutate !
+def city_dist( city, neighbor):
+    # calculates euclidean distance between two cities
+    dx = city.x - neighbor.x
+    dy = city.y - neighbor.y
+    distance = math.sqrt(dx ** 2 + dy ** 2)
+    return distance
 class Agent:
     fitnesstype = fitness_selector().select
 
@@ -106,15 +113,13 @@ class PSO_prb(DNA):
         self.velocity = [random.random() for i in range(target_size)]
 
     def calculate_new_position(self):
-        pos = ""
-        for i in range(len(self.object)):
-            pos += chr((ord(self.object[i]) + int(self.velocity[i])) % 256)
-        self.object = pos
+        pass
 
-    def calculate_velocity(self, c1, c2, gl_best, w=0.5):
+    def calculate_velocity(self,target, c1, c2, gl_best, w=0.8):
+        cities=target[0]
         for i in range(len(self.object)):
-            cc1 = c1 * (ord(self.p_best_object[i]) - ord(self.object[i])) * random.random()
-            cc2 = c2 * (ord(gl_best[i]) - ord(self.object[i])) * random.random()
+            cc1 = c1 * city_dist(cities[self.p_best_object[i]-1] ,cities[self.object[i]-1]) * random.random()
+            cc2 = c2 * city_dist(cities[gl_best[i]-1],cities[self.object[i]-1]) * random.random()
             self.velocity[i] = self.velocity[i] * w + cc1 + cc2
 
     def __eq__(self, other):
@@ -129,22 +134,26 @@ class PSO_prb(DNA):
             return super(PSO_prb, self).__str__()
 
 # todo: create new problem set for clark write
-class clark_wright(DNA):
+class clark_wright(PSO_prb):
     def __init__(self):
         super(clark_wright, self).__init__()
     def create_object(self, target_size, target):
-        cities, cost_matrix, dimentions, capacity=target[0],target[1],target[2],target[3]
-        tours = [[0, i, 0] for i in range(1, dimentions)]
+        ret = self.clarck_W(target)
+        self.object=ret
+        self.create_special_parameter(target_size)
 
-        indexes, savings=self.savings(dimentions,cost_matrix)
+    def clarck_W(self, target):
+        cities, cost_matrix, dimentions, capacity = target[0], target[1], target[2], target[3]
+        tours = [[0, i, 0] for i in range(1, dimentions)]
+        indexes, savings = self.savings(dimentions, cost_matrix)
         for i, j in indexes:
             # if len(tours) == num_vehicles:
             #     break
             for tour1 in tours:
                 for tour2 in tours:
                     if tour1 != tour2:
-                        demand1 = self.tourDemand(tour1,cities)
-                        demand2 = self.tourDemand(tour2,cities)
+                        demand1 = self.tourDemand(tour1, cities)
+                        demand2 = self.tourDemand(tour2, cities)
                         if demand1 + demand2 > capacity:
                             continue
 
@@ -161,11 +170,10 @@ class clark_wright(DNA):
         final_tour = []
         for tour in tours:
             final_tour += tour[1:len(tour) - 1]
-
         ret = []
         for t in final_tour:
             ret.append(t + 1)
-        self.object=ret
+        return ret
 
     def tourDemand(self,tour,cities):
         sum = 0
@@ -185,10 +193,29 @@ class clark_wright(DNA):
         sorted_indexes = sorted(savings, key=savings.get, reverse=True)
         return sorted_indexes, savings
 
-class nearest_neighbour(DNA):
+
+    def calculate_new_position(self):
+
+        print(self.velocity)
+
+    # def calculate_velocity(self, c1, c2, gl_best, w=0.8):
+    #     for i in range(len(self.object)):
+    #         cc1 = c1 * (ord(self.p_best_object[i]) - ord(self.object[i])) * random.random()
+    #         cc2 = c2 * (ord(gl_best[i]) - ord(self.object[i])) * random.random()
+    #         self.velocity[i] = self.velocity[i] * w + cc1 + cc2
+
+
+class nearest_neighbour(PSO_prb):
     def __init__(self):
         super(nearest_neighbour, self).__init__()
+
     def create_object(self, target_size, target):
+        self.object=self.nn(target)
+        self.create_special_parameter(target_size)
+    def calculate_new_position(self):
+
+        print(self.velocity)
+    def nn(self, target):
         cities, cost_matrix, dimentions, capacity = target[0], target[1], target[2], target[3]
         available = [i for i in range(1, len(cities))]
         arr = []
@@ -205,5 +232,4 @@ class nearest_neighbour(DNA):
                     mini = city.neighb[j]
             available.remove(index)
             arr.append(index + 1)
-        self.object=arr
-
+        return arr
