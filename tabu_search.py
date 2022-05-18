@@ -35,7 +35,7 @@ class tabu(algortithem):
     def fitness(self, obj):
         fitness = self.prob_spec()
         fitness.object = obj
-        return fitness.calculate_fittness(self.target, self.target_size, "fitness")
+        return fitness.calculate_fittness(self.target, self.target_size,self.fitnesstype)
 
     def algo(self, i):
 
@@ -54,4 +54,4 @@ class tabu(algortithem):
             self.tabuList.remove(self.tabuList[0])
         # update solution
         self.solution.object = self.sbest
-        self.solution.calculate_fittness(self.target, self.target_size, "fitness")
+        self.solution.calculate_fittness(self.target, self.target_size, self.fitnesstype)

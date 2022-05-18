@@ -1,23 +1,25 @@
+import os
+import random
+
 import matplotlib.pyplot as plt
 from Genetic import GA_LAB1
 from ACO import ACO_alg
-from PSO import PSO_alg
 import math
 from simulated_annealing import simulated_annealing
 from tabu_search import tabu
-from create_problem_sets import nearest_neighbour,clark_wright
+from create_problem_sets import nearest_neighbour,clark_wright,acly
 from settings import *
 import time
 # algo = {GenA: GA_LAB1, ISLAND: PureMA, ACO_PAR: ACO, SA: simulated_anealling, TS: Tabu_search, CO_PS: CO_PSO}
 algo = {1: GA_LAB1, 2: ACO_alg,3:simulated_annealing,4:tabu }
 tags = {1: "GA_CX_SWAP", 2: "ACO",3:"simulated_annealing",4:"tabu" }
-heuristics={1: "NN", 2: "C&W"}
-mutation_index={2:"SWAP",3:"INSERT"}
-problem_sets_GA = {1: nearest_neighbour, 2: clark_wright}
+heuristics={0:"",1: "NN", 2: "C&W"}
+mutation_index={1:"rand",2:"SWAP",3:"INSERT"}
+problem_sets_GA = {1: nearest_neighbour, 2: clark_wright,3:acly}
 # problem_sets_PSO = {BUL_PGIA: PSO_prb}
-inputs_for_testing=["","E-n22-k4", "E-n33-k4","E-n51-k5",  "E-n76-k8",  "E-n76-k10",
+inputs_for_testing=["ackly","E-n22-k4", "E-n33-k4","E-n51-k5",  "E-n76-k8",  "E-n76-k10",
            "E-n101-k8",  "E-n101-k14"]
-def plot(fitness, iter,tag,names):
+def plot(fitness, iter,tag,names,show=False):
 
     for i in range(len(fitness)):
         plt.plot(iter[i],fitness[i], label=names[i])
@@ -25,7 +27,14 @@ def plot(fitness, iter,tag,names):
     plt.xlabel('iterations')
     plt.title(inputs_for_testing[tag])
     plt.legend()
-    plt.savefig(f"outputs\{inputs_for_testing[tag]}\{inputs_for_testing[tag]}-iter{len(iter[0])}.png")
+    if show:
+        plt.show()
+
+    else:
+        CHECK_FOLDER = os.path.isdir(f"outputs\{inputs_for_testing[tag]}")
+        if not CHECK_FOLDER:
+            os.makedirs(f"outputs\{inputs_for_testing[tag]}")
+        plt.savefig(f"outputs\{inputs_for_testing[tag]}\{inputs_for_testing[tag]}-iter{len(iter[0])}.png")
     plt.close()
 
 
@@ -140,7 +149,8 @@ def ga_script(iterations,popsize):
         fitness_arr,iter_array=[],[]
 
         for select_generator in range(1, 3):
-            cities, cost_matrix, dimentions, capacity = get_sets_from_files(inputs[select_input])
+            # cities, cost_matrix, dimentions, capacity = get_sets_from_files(inputs[select_input])
+            cities, cost_matrix, dimentions, capacity = ackley()
             GA_TARGET = [cities, cost_matrix, dimentions, capacity]
             target_size = len(cities)
 
@@ -180,6 +190,74 @@ def ga_script(iterations,popsize):
             names.append("ACO_" + heuristics[select_generator] )
         plot(fitness_arr, iter_array, select_input,names)
 
+def test(iterations,popsize):
+    GA_POPSIZE=popsize
+    max_iter=iterations
+    Gene_dist = 4
+
+    names = []
+    select_generator = 3
+    problem_set = problem_sets_GA[select_generator]
+
+
+    fitness_arr,iter_array=[],[]
+
+    for select_generator in range(0, 1):
+        # cities, cost_matrix, dimentions, capacity = get_sets_from_files(inputs[select_input])
+        cities, cost_matrix, dimentions, capacity = ackley()
+        GA_TARGET = [cities, cost_matrix, dimentions, capacity]
+        target_size = len(cities)
+
+        for mutation in range(1,2):
+
+            print("GA_I_"+heuristics[select_generator]+"_"+mutation_index[mutation])
+
+            sol=GA_LAB1(GA_TARGET, target_size, GA_POPSIZE, problem_set, 2, "ackly", 3,
+                                      1, mutation, Gene_dist,max_iter=max_iter)
+            fitness,iteration=sol.solve()
+            fitness_arr.append(fitness)
+            iter_array.append(iteration)
+            names.append("GA_I_"+heuristics[select_generator]+"_"+mutation_index[mutation])
+
+            print("SA_"+heuristics[select_generator]+"_"+mutation_index[mutation])
+
+            sol = algo[3](GA_TARGET, target_size, GA_POPSIZE, problem_set, "ackly", max_iter, mutation)
+            fitness, iteration = sol.solve()
+            fitness_arr.append(fitness)
+            iter_array.append(iteration)
+            names.append("SA_"+heuristics[select_generator]+"_"+mutation_index[mutation])
+
+            print("TS_"+heuristics[select_generator]+"_"+mutation_index[mutation])
+
+            sol = algo[4](GA_TARGET, target_size, GA_POPSIZE, problem_set, "ackly", max_iter, mutation)
+            fitness, iteration = sol.solve()
+            fitness_arr.append(fitness)
+            iter_array.append(iteration)
+            names.append("TS_"+heuristics[select_generator]+"_"+mutation_index[mutation])
+
+        print("ACO_" + heuristics[select_generator] )
+
+        sol = algo[2](GA_TARGET, target_size, GA_POPSIZE, problem_set, "acoackly", max_iter,selection=True)
+        fitness, iteration = sol.solve()
+        fitness_arr.append(fitness)
+        iter_array.append(iteration)
+        names.append("ACO_" + heuristics[select_generator] )
+    plot(fitness_arr, iter_array, 0,names)
+
+def ackly_value():
+    return random.randint(-32768,32768)/1000
+
+
+def ackley():
+
+    dimentions=10
+    cost_matrix = [[0 for i in range(dimentions)] for j in range(dimentions)]
+    capacity=2000
+    cities = []
+    for i in range(1,dimentions+1):
+        city=City(i,ackly_value(),0,dimentions)
+        cities.append(city)
+    return cities, cost_matrix, dimentions, capacity
 def border():
     print("----------------------------------")
 def main():
@@ -207,10 +285,9 @@ def main():
         border()
 
         max_iter = int(input("number of iterations:"))
-
-        select_generator=int(input("select heuristic: \n1: nearest_neighbour \n2: clark_wright"))
         border()
 
+        select_generator=int(input("select heuristic: \n1: nearest_neighbour \n2: clark_wright"))
         problem_set = problem_sets_GA[select_generator]
         if alg==1 or alg==4 or alg==3:
             border()
@@ -221,13 +298,12 @@ def main():
             border()
 
             GA_POPSIZE = int(input("set population size:"))
-
             solution =GA_LAB1(GA_TARGET, target_size, GA_POPSIZE, problem_set, CX_, "fitness", 3,
                     1, mutation, Gene_dist, max_iter=max_iter)
         elif alg==3 or alg==4:
             solution = algo[alg](GA_TARGET, target_size, GA_POPSIZE, problem_set, "fitness", max_iter, mutation)
         else:
-            solution = algo[2](GA_TARGET, target_size, GA_POPSIZE, problem_set, "fitness", max_iter)
+            solution = algo[2](GA_TARGET, target_size, GA_POPSIZE, problem_set, "fitness", max_iter,selection=False)
 
 
         overall_time = time.perf_counter()
@@ -238,19 +314,31 @@ def main():
         print("Overall runtime :", overall_time)
         border()
 
-        print("\n run again ? press y for yes n for no ")
+        print("\n run again on another algorithm ?\n press y/n for yes or no\n press n to return to main menu")
         if input() == "n":
             process = False
 
 
 if __name__ == "__main__":
-    selector=int(input("select manual settings or test of all algorithms:\n1: manual  \n2:automatic test"))
-    border()
-    if selector==1:
-        main()
-    else:
+    first=True
+    while(first or input("press any key then enter to return to main menu otherwize type exit:")!="exit"):
+        selector = int(
+            input("select manual settings or test of all algorithms:\n1: manual  \n2:automatic test \n3:ackly test:"))
         border()
-        popsize = int(input("enter population size for all tests:"))
-        border()
-        iterations=int(input("enter  number of max iterations:"))
-        ga_script(iterations,popsize)
+        if selector==1:
+            main()
+        elif selector==2:
+            border()
+            popsize = int(input("enter population size for all tests:"))
+            border()
+            iterations=int(input("enter  number of max iterations:"))
+            ga_script(iterations,popsize)
+            print("test results are in the output/'each problem in its name' folder")
+        elif selector == 3:
+            border()
+            popsize = int(input("enter population size for all tests:"))
+            border()
+            iterations = int(input("enter  number of max iterations:"))
+            test(iterations,popsize)
+            print("test results are in the output/ackley folder")
+        first=False

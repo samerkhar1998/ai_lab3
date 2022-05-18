@@ -7,7 +7,7 @@ class mutations:
 
     def random_mutate(self, target_size, member, character_creation):
         ipos = random.randint(0, target_size - 1)
-        delta = character_creation(target_size)
+        delta = member.character_creation(target_size)
         member.object = member.object[:ipos] + [delta] + member.object[ipos + 1:]
 
     def swap_mutate(self, target_size, member, character_creation):

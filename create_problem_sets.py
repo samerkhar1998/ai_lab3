@@ -1,31 +1,37 @@
-
 import random
 import sys
+
+import numpy
+
 from fitness_functions import fitness_selector
 from mutations import mutations
 import math
+
+
 # have to fill hash table with different keys when getting the command from main
 
 
 # basic class for all problem sets because fittness and the member of the population are problem specific
 # and we have to eliminate problem specifc parameters from the Genetic algorithem
 # might add mutate !
-def city_dist( city, neighbor):
+def city_dist(city, neighbor):
     # calculates euclidean distance between two cities
     dx = city.x - neighbor.x
     dy = city.y - neighbor.y
     distance = math.sqrt(dx ** 2 + dy ** 2)
     return distance
+
+
 class Agent:
     fitnesstype = fitness_selector().select
 
     def __init__(self):
-        self.object =[]
-        self.learning_fitness=0
-        self.algo_huristic=None
+        self.object = []
+        self.learning_fitness = 0
+        self.algo_huristic = None
         self.age = 0
         self.fitness = 0
-        self.solution=""
+        self.solution = ""
 
     # creates a member of the population
     def create_object(self, target_size, target):
@@ -33,9 +39,11 @@ class Agent:
 
     def character_creation(self, target_size):
         pass
+
     def Learning_fitness(self, target, target_size, huristic):
         self.learning_fitness = self.fitnesstype[huristic](self, target, target_size)
         return self.learning_fitness
+
     # function to calculate the fitness for this specific problem
 
     def calculate_fittness(self, target, target_size, select_fitness, age_update=True):
@@ -54,7 +62,7 @@ class Agent:
         bstr = ""
         for i in self.object:
             bstr += str(i) + ","
-        bstr+=self.solution
+        bstr += self.solution
         return bstr
 
     def __repr__(self):
@@ -115,11 +123,11 @@ class PSO_prb(DNA):
     def calculate_new_position(self):
         pass
 
-    def calculate_velocity(self,target, c1, c2, gl_best, w=0.8):
-        cities=target[0]
+    def calculate_velocity(self, target, c1, c2, gl_best, w=0.8):
+        cities = target[0]
         for i in range(len(self.object)):
-            cc1 = c1 * city_dist(cities[self.p_best_object[i]-1] ,cities[self.object[i]-1]) * random.random()
-            cc2 = c2 * city_dist(cities[gl_best[i]-1],cities[self.object[i]-1]) * random.random()
+            cc1 = c1 * city_dist(cities[self.p_best_object[i] - 1], cities[self.object[i] - 1]) * random.random()
+            cc2 = c2 * city_dist(cities[gl_best[i] - 1], cities[self.object[i] - 1]) * random.random()
             self.velocity[i] = self.velocity[i] * w + cc1 + cc2
 
     def __eq__(self, other):
@@ -133,13 +141,15 @@ class PSO_prb(DNA):
         else:
             return super(PSO_prb, self).__str__()
 
+
 # todo: create new problem set for clark write
 class clark_wright(PSO_prb):
     def __init__(self):
         super(clark_wright, self).__init__()
+
     def create_object(self, target_size, target):
         ret = self.clarck_W(target)
-        self.object=ret
+        self.object = ret
         self.create_special_parameter(target_size)
 
     def clarck_W(self, target):
@@ -175,13 +185,13 @@ class clark_wright(PSO_prb):
             ret.append(t + 1)
         return ret
 
-    def tourDemand(self,tour,cities):
+    def tourDemand(self, tour, cities):
         sum = 0
         for city in tour:
             sum += cities[city].demand
         return sum
 
-    def savings(self,dimentions,cost_matrix):
+    def savings(self, dimentions, cost_matrix):
         # savings for (i, j) = cost(i,0) + cost(0,j) - cost(i,j)
         # returns list of savings for all city pairs (i, j)
         savings = {}
@@ -192,11 +202,6 @@ class clark_wright(PSO_prb):
 
         sorted_indexes = sorted(savings, key=savings.get, reverse=True)
         return sorted_indexes, savings
-
-
-    def calculate_new_position(self):
-
-        print(self.velocity)
 
     # def calculate_velocity(self, c1, c2, gl_best, w=0.8):
     #     for i in range(len(self.object)):
@@ -210,11 +215,9 @@ class nearest_neighbour(PSO_prb):
         super(nearest_neighbour, self).__init__()
 
     def create_object(self, target_size, target):
-        self.object=self.nn(target)
+        self.object = self.nn(target)
         self.create_special_parameter(target_size)
-    def calculate_new_position(self):
 
-        print(self.velocity)
     def nn(self, target):
         cities, cost_matrix, dimentions, capacity = target[0], target[1], target[2], target[3]
         available = [i for i in range(1, len(cities))]
@@ -233,3 +236,29 @@ class nearest_neighbour(PSO_prb):
             available.remove(index)
             arr.append(index + 1)
         return arr
+
+
+def ackly_value(dimention):
+    r_min, r_max = -32.768, 32.768
+    yo = 32.768 * 2 / 10
+    x = numpy.arange(r_min, r_max, yo)
+    x = [k for k in x]
+    return x
+
+
+class acly(clark_wright):
+    def create_object(self, target_size, target):
+        for i in range(10):
+            self.object.append(self.character_creation(target_size))
+
+    def character_creation(self, target_size):
+        return random.randrange(-32768, 32768) / 1000
+
+
+class aco_ackly(acly):
+    def create_object(self, target_size, target):
+        for i in range(10):
+            self.object=ackly_value(10)
+
+    def character_creation(self, target_size):
+        return random.randrange(-32768, 32768) / 1000
