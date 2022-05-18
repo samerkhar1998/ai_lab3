@@ -3,7 +3,9 @@ import math
 from settings import BIN, HIGH_PENALTY, PENALTY, LIV_DIST, KINDL_TAU
 from numpy import unique
 import numpy
+
 hash_table = {}
+
 
 # todo: fitness function that translate's input into cars+cities that returns a value
 class fitness_selector:
@@ -11,7 +13,7 @@ class fitness_selector:
         self.select = {0: self.distance_fittness, 1: self.bul_pqia, 2: self.n_queens_conflict,
                        3: self.n_queens_conf_based_on_place, BIN: self.bins_fitness,
                        LIV_DIST: self.levenshteinDistance, KINDL_TAU: self.kendallTau, 'baldwin': self.baldwinss,
-                       "fixed": self.fixed_distance,"fitness":self.fitness}
+                       "fixed": self.fixed_distance, "fitness": self.fitness,"ackly":self.ackly,"acoackly":self.acoackly}
 
     def distance_fittness(self, object, target, target_size):
         fitness = 0
@@ -143,17 +145,17 @@ class fitness_selector:
         for i in range(len(target)):
             if object[i] == target[i]:
                 correct += 1
-            elif object[i]!='?':
+            elif object[i] != '?':
                 incorrect += 1
         return correct, incorrect
 
     def baldwinss(self, pop_size, tries, num_tries):
         return 1 + ((pop_size - 1) * tries / num_tries)
 
-    def fitness(self, object, target, return_output=True,funct=False):
-        cities, cost_matrix, dimentions, capacity=target[0],target[1],target[2],target[3]
+    def fitness(self, object, target, return_output=True, funct=False):
+        cities, cost_matrix, dimentions, capacity = target[0], target[1], target[2], target[3]
         prints = False
-        arr=object.object
+        arr = object.object
         fit = 0
         repo = cities[0]
         prev = arr[0] - 1
@@ -166,10 +168,7 @@ class fitness_selector:
             curr = arr[i] - 1
             new_truck_distance = repo.neighb[prev] + repo.neighb[curr]
             straight_distance = cities[prev].neighb[curr]
-
-
             cap_sum += cities[curr].demand
-
             if new_truck_distance < straight_distance or cap_sum >= capacity:
                 allPaths.append(currPath)
                 currPath = [curr]
@@ -195,13 +194,51 @@ class fitness_selector:
             for path in allPaths:
                 writ += f"Car {counter}: " + "0 " + "".join(str(x) + " " for x in path) + "0" + "\n"
                 counter += 1
-        object.solution=writ
-        object.fitness=fit
+        object.solution = writ
+        object.fitness = fit
         return fit
 
-    def city_dist(self,city, neighbor):
+    def city_dist(self, city, neighbor):
         # calculates euclidean distance between two cities
         dx = city.x - neighbor.x
         dy = city.y - neighbor.y
         distance = math.sqrt(dx ** 2 + dy ** 2)
         return distance
+
+    def ackly_dist(self, city, neighbor):
+        a = 20
+        b = 0.2
+        c = 2 * math.pi
+        d = 10  # dimentions
+        sum_on_x = sum([x ** 2 for x in city.x])
+        cos_sum = sum([math.cos(c * x) for x in city.x])
+        c_fitness = -a * math.exp(-b * (math.sqrt((1 / d) * sum_on_x))) - math.exp(
+            (1 / d) * cos_sum) + a + math.exp(1)
+        sum_on_x = sum([x ** 2 for x in neighbor.x])
+        cos_sum = sum([math.cos(c * x) for x in neighbor.x])
+        n_fitness = -a * math.exp(-b * (math.sqrt((1 / d) * sum_on_x))) - math.exp(
+            (1 / d) * cos_sum) + a + math.exp(1)
+
+        return abs(c_fitness-n_fitness)
+    def ackly(self, object, target, return_output=True, funct=False):
+        a = 20
+        b = 0.2
+        c = 2*math.pi
+        d = 10  # dimentions
+        sum_on_x = sum([x ** 2 for x in object.object])
+        cos_sum = sum([math.cos(c * x) for x in object.object])
+        object.fitness = -a * math.exp(-b * (math.sqrt((1 / d) * sum_on_x))) - math.exp((1 / d) * cos_sum) + a + math.exp(1)
+        return object.fitness
+    def acoackly(self, object, target, return_output=True, funct=False):
+
+        a = 20
+        b = 0.2
+        c = 2 * math.pi
+        d = 10  # dimentions
+
+        cities=target[0]
+        sum_on_x = sum([x.x ** 2 for x in cities])
+        cos_sum = sum([math.cos(c * x.x) for x in cities])
+        object.fitness = -a * math.exp(-b * (math.sqrt((1 / d) * sum_on_x))) - math.exp(
+            (1 / d) * cos_sum) + a + math.exp(1)
+        return object.fitness

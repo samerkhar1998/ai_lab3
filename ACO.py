@@ -1,28 +1,61 @@
+import math
+import random
+
 from algorithems import algortithem
 import numpy
 from fitness_functions import fitness_selector
+class City:
+    def __init__(self, id, x, y, dimension):
+        self.id = id
+        self.demand = 0
+        self.x, self.y = x, y
+        self.neighb = [0] * dimension
 
+    def distance(self, other):
+        dx = self.x - other.x
+        dy = self.y - other.y
+        distance = math.sqrt(dx ** 2 + dy ** 2)
+        return distance
 class ACO_alg(algortithem):
     def __init__(self, target, tar_size, pop_size, problem_spec, fitnesstype,max_iter, selection=None):
+        self.fitnesstype = fitnesstype
         algortithem.__init__(self, target, tar_size, pop_size, problem_spec, fitnesstype, selection,max_iter)
         self.cities = target[0]
         self.cost_matrix = target[1]
         self.dimentions = target[2]
         self.capacity = target[3]
-        self.PheromoneMatrix,self.temp=self.initiate_phermones()
         self.global_sol = []
         self.current_sol =[]
         self.glob_counter = 0
         self.glob_visit = []
         self.distance=fitness_selector().city_dist
+        self.prev=self.solution
+        self.selection=selection
 
+        if selection:
+            self.cities=[]
+            for i in range(10):#ants
+                pbo=self.prob_spec()
+                self.cities.append(City(i+1,pbo.character_creation(self.target_size),0,10))
+        self.PheromoneMatrix,self.temp=self.initiate_phermones()
+        self.target[0]=self.cities
+    def init_population(self):
+        pass
     def fitness(self, obj):
         fitness = self.prob_spec()
         fitness.object = obj
-        return fitness.calculate_fittness(self.target, self.target_size, "fitness")
+        fitness.calculate_fittness(self.target, self.target_size, self.fitnesstype)
+        return fitness.calculate_fittness(self.target, self.target_size,self.fitnesstype)
     def algo(self, i):
-        cities=self.cities
+        if self.selection:
+            for i in range(10):  # ants
+                self.cities[i].x-=abs(self.cities[i].x/random.randint(5,10)) if self.cities[i].x>0 else -abs(self.cities[i].x/random.randint(5,10))
+        self.PheromoneMatrix, self.temp = self.initiate_phermones()
+        cities= self.cities
+        self.target[0]=cities
         if self.glob_counter == round(self.max_iter / 16):
+
+            self.target[0] = self.cities
             self.PheromoneMatrix, self.temp = self.initiate_phermones()
             self.glob_counter = 0
             self.current_sol =[]
@@ -43,7 +76,6 @@ class ACO_alg(algortithem):
         else:
             self.glob_counter += 1
 
-
         if self.fitness(self.current_sol)<self.fitness(self.global_sol):
             self.glob_counter = 0
             self.global_sol = self.current_sol
@@ -51,8 +83,12 @@ class ACO_alg(algortithem):
         else:
             self.glob_counter += 1
 
-        self.solution.object=self.global_sol
-        self.solution.calculate_fittness(self.target, self.target_size, "fitness")
+            # update solution
+            self.prev=self.solution
+            self.solution.object = self.global_sol
+            self.target[0]=self.cities
+            self.solution.calculate_fittness(self.target, self.target_size, self.fitnesstype)
+
 
     def visited_cities(self, cities):
         visited = []
@@ -118,4 +154,4 @@ class ACO_alg(algortithem):
         return matrix
 
     def stopage(self, i):
-        return False
+        return self.solution.fitness==0

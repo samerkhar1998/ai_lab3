@@ -18,7 +18,7 @@ class simulated_annealing(algortithem):
     def fitness(self, obj):
         fitness = self.prob_spec()
         fitness.object = obj
-        return fitness.calculate_fittness(self.target, self.target_size, "fitness")
+        return fitness.calculate_fittness(self.target, self.target_size, self.fitnesstype)
     def mutatate(self,s):
         snew=self.prob_spec()
         snew.object=s
@@ -48,4 +48,4 @@ class simulated_annealing(algortithem):
 
         # update solution
         self.solution.object = self.global_best
-        self.solution.calculate_fittness(self.target, self.target_size, "fitness")
+        self.solution.calculate_fittness(self.target, self.target_size,self.fitnesstype)
